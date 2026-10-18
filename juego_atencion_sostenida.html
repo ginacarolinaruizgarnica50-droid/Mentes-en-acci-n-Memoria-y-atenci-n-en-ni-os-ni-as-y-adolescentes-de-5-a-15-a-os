@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Globos: juego de atención sostenida</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ef;--ink:#1d2540;--soft:#5b6380;--card:#fff;--line:#dcd8cc;--g:#2f9e62;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141829;--ink:#eef0f8;--soft:#a8afc8;--card:#1e2440;--line:#343c5e;--g:#5cd08e}}
+:root[data-theme="dark"]{--bg:#141829;--ink:#eef0f8;--soft:#a8afc8;--card:#1e2440;--line:#343c5e;--g:#5cd08e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.5 Nunito,system-ui,sans-serif}
+h1,h2,button{font-family:Fredoka,system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:24px 18px 50px;text-align:center}
+h1{font-size:clamp(28px,6vw,38px);margin:0 0 6px;font-weight:600}
+.card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:20px;margin-top:16px;text-align:left}
+.card h2{margin:0 0 8px;font-size:22px}
+ol{margin:0;padding-left:22px}li{margin-bottom:6px}
+.ages{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.btn{border:3px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:12px 20px;font-size:19px;cursor:pointer}
+.btn:hover,.btn.on{background:var(--ink);color:var(--bg)}
+.btn:focus-visible{outline:3px solid var(--g);outline-offset:3px}
+.go{display:block;margin:18px auto 0;background:var(--g);border-color:var(--g);color:#fff;font-size:24px;padding:14px 34px}
+.go:hover{background:var(--g);color:#fff;filter:brightness(1.1)}
+#game{display:none}
+#target{font-size:22px;margin:6px 0}
+#sw{display:inline-block;width:28px;height:28px;border-radius:50%;vertical-align:middle;border:3px solid var(--ink)}
+#stage{height:min(52vh,340px);display:flex;align-items:center;justify-content:center;background:var(--card);border:2px solid var(--line);border-radius:22px;margin:10px 0}
+.balloon{width:110px;height:136px;border-radius:50% 50% 48% 48%;position:relative}
+.balloon:after{content:"";position:absolute;left:50%;bottom:-30px;width:3px;height:30px;background:var(--soft)}
+#now{width:100%;font-size:30px;padding:20px;background:var(--g);border-color:var(--g);color:#fff}
+#bar{height:10px;background:var(--line);border-radius:9px;overflow:hidden}#bar i{display:block;height:100%;width:0;background:var(--g)}
+table{width:100%;border-collapse:collapse;margin-top:10px}td{padding:8px;border-bottom:1px solid var(--line)}td:last-child{text-align:right;font-weight:700}
+#res{display:none}
+.note{color:var(--soft);font-size:15px}
+</style>
+</head>
+<body>
+<main>
+<div id="intro">
+  <h1>Globos</h1>
+  <p class="note">Juego de atención sostenida · Ficha 1</p>
+  <div class="card"><h2>Cómo se juega</h2>
+    <ol><li>Arriba verás el <b>color objetivo</b>.</li>
+    <li>Van a aparecer globos de uno en uno.</li>
+    <li>Toca el botón <b>¡Ahora!</b> (o la barra espaciadora) <b>solo</b> cuando aparezca un globo de ese color.</li>
+    <li>Si el globo es de otro color, no toques nada.</li>
+    <li>Sigue atento hasta que termine el tiempo.</li></ol></div>
+  <div class="card"><h2>Elige tu edad</h2>
+    <div class="ages" id="ages"></div>
+    <button class="btn go" id="start">Empezar</button></div>
+</div>
+
+<div id="game">
+  <div id="target">Toca solo el globo <span id="sw"></span> <b id="tn"></b></div>
+  <div id="bar"><i id="fill"></i></div>
+  <div id="stage" aria-live="off"></div>
+  <button class="btn" id="now">¡Ahora!</button>
+</div>
+
+<div id="res">
+  <h1>¡Terminaste!</h1>
+  <div class="card"><h2>Resultados</h2><table id="tb"></table>
+  <p class="note" id="msg"></p></div>
+  <button class="btn go" id="again">Jugar otra vez</button>
+</div>
+</main>
+<script>
+const LV={a:{n:"5 a 8 años",t:90,iv:2200,p:.3,c:["rojo","azul","verde"]},
+b:{n:"9 a 11 años",t:120,iv:1700,p:.25,c:["rojo","azul","verde","amarillo"]},
+c:{n:"12 a 15 años",t:180,iv:1200,p:.2,c:["rojo","azul","verde","amarillo","morado"]}};
+const HEX={rojo:"#e0362c",azul:"#2f6fd0",verde:"#2f9e62",amarillo:"#f2c230",morado:"#8a4fc7"};
+const $=s=>document.querySelector(s);let lv="a",run=null;
+Object.keys(LV).forEach(k=>{const b=document.createElement("button");b.className="btn"+(k==="a"?" on":"");b.textContent=LV[k].n;
+ b.onclick=()=>{lv=k;document.querySelectorAll("#ages .btn").forEach(x=>x.classList.remove("on"));b.classList.add("on")};$("#ages").appendChild(b)});
+function start(){const L=LV[lv],target=L.c[Math.floor(Math.random()*L.c.length)];
+ run={L,target,trials:[],cur:null,t0:Date.now(),done:false};
+ $("#sw").style.background=HEX[target];$("#tn").textContent=target;
+ $("#intro").style.display="none";$("#res").style.display="none";$("#game").style.display="block";next()}
+function next(){const r=run;if(r.done)return;const el=Date.now()-r.t0;$("#fill").style.width=Math.min(100,el/(r.L.t*10))+"%";
+ if(el>=r.L.t*1000)return finish();
+ const isT=Math.random()<r.L.p,others=r.L.c.filter(c=>c!==r.target),col=isT?r.target:others[Math.floor(Math.random()*others.length)];
+ r.cur={isT,responded:false,rt:null,on:Date.now()};r.trials.push(r.cur);
+ $("#stage").innerHTML='<div class="balloon" style="background:'+HEX[col]+'"></div>';
+ setTimeout(()=>{if(run===r)$("#stage").innerHTML=""},r.L.iv*.7);
+ setTimeout(()=>{if(run===r)next()},r.L.iv)}
+function press(){if(!run||run.done||!run.cur||run.cur.responded)return;run.cur.responded=true;run.cur.rt=Date.now()-run.cur.on;
+ $("#now").style.filter="brightness(1.4)";setTimeout(()=>$("#now").style.filter="",120)}
+function finish(){const r=run;r.done=true;let h=0,o=0,f=0,rts=[];
+ r.trials.forEach(t=>{if(t.isT&&t.responded){h++;rts.push(t.rt)}else if(t.isT)o++;else if(t.responded)f++});
+ const tg=h+o,acc=tg?Math.round(h/tg*100):0,avg=rts.length?Math.round(rts.reduce((a,b)=>a+b,0)/rts.length):0;
+ const rows=[["Edad",r.L.n],["Duración",r.L.t+" segundos"],["Globos objetivo",tg],["Aciertos",h],["Omisiones (no tocó el objetivo)",o],["Errores (tocó otro color)",f],["Porcentaje de aciertos",acc+"%"],["Tiempo de reacción promedio",avg?avg+" ms":"—"]];
+ $("#tb").innerHTML=rows.map(x=>"<tr><td>"+x[0]+"</td><td>"+x[1]+"</td></tr>").join("");
+ $("#msg").textContent=acc>=80&&f<=2?"¡Excelente concentración!":"Buen intento. Inténtalo otra vez y mira si mejoras.";
+ $("#game").style.display="none";$("#res").style.display="block";run=null}
+$("#start").onclick=start;$("#again").onclick=()=>{$("#res").style.display="none";$("#intro").style.display="block"};
+$("#now").onclick=press;
+document.addEventListener("keydown",e=>{if(e.code==="Space"&&run){e.preventDefault();press()}});
+</script>
+</body>
+</html>

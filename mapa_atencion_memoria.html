@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estimulación cognitiva: atención y memoria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ef;--ink:#1d2540;--soft:#5b6380;--card:#fff;--line:#dcd8cc;--g:#2f9e62;--gl:#e0f3e8;--b:#2f6fd0;--bl:#e1ecfb;--o:#e8801f;--ol:#fdebd6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141829;--ink:#eef0f8;--soft:#a8afc8;--card:#1e2440;--line:#343c5e;--gl:#17382a;--bl:#172d52;--ol:#4a2d12;--g:#5cd08e;--b:#7aa9f5;--o:#f5a350}}
+:root[data-theme="dark"]{--bg:#141829;--ink:#eef0f8;--soft:#a8afc8;--card:#1e2440;--line:#343c5e;--gl:#17382a;--bl:#172d52;--ol:#4a2d12;--g:#5cd08e;--b:#7aa9f5;--o:#f5a350}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 Nunito,system-ui,sans-serif}
+h1,h2,h3,.chip,.back{font-family:Fredoka,system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:28px 18px 60px}
+.hub{text-align:center;margin-bottom:28px}
+.hub h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0 0 8px;font-weight:600}
+.hub p{margin:0 auto;color:var(--soft);max-width:560px}
+.branches{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.branch{border:3px solid var(--c);background:var(--cl);border-radius:26px;padding:20px}
+.branch h2{margin:0 0 4px;color:var(--c);font-size:26px}
+.branch>p{margin:0 0 14px;color:var(--soft);font-size:15px}
+.group{margin:12px 0 6px;font-weight:700;font-size:14px;color:var(--soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--c);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:16px;font-weight:500;cursor:pointer}
+.chip:hover{background:var(--c);color:#fff}
+.chip:focus-visible,.back:focus-visible,.refbtn:focus-visible,.x:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.refbtn{display:block;margin:26px auto 0;border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 22px;font:500 17px Fredoka,sans-serif;cursor:pointer}
+dialog{border:3px solid var(--c);border-radius:24px;background:var(--card);color:var(--ink);max-width:620px;width:calc(100% - 28px);padding:0}
+dialog::backdrop{background:rgba(20,24,41,.55)}
+.dh{background:var(--cl);padding:18px 22px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.dh h3{margin:0;font-size:24px;color:var(--c)}
+.x{border:0;background:var(--c);color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer;flex:none}
+.db{padding:16px 22px 22px}
+.db p{margin:0 0 12px}
+.ex{background:var(--cl);border-radius:14px;padding:10px 14px;font-size:16px}
+.db ul{padding-left:20px;margin:0}.db li{margin-bottom:10px}
+.page{display:none}.page.on{display:block}
+.back{border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 18px;font-size:16px;cursor:pointer;margin-bottom:18px}
+.refs{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:12px 24px;max-width:760px}
+.refs p{margin:14px 0;padding-left:2em;text-indent:-2em;font-size:16px}
+.note{color:var(--soft);font-size:14px;max-width:760px}
+.G{--c:var(--g);--cl:var(--gl)}.B{--c:var(--b);--cl:var(--bl)}.O{--c:var(--o);--cl:var(--ol)}
+</style>
+</head>
+<body>
+<main>
+<div class="page on" id="home">
+  <div class="hub">
+    <h1>Estimulación cognitiva: atención y memoria</h1>
+    <p>Toca un botón para abrir su explicación. Pensado para niños y niñas de 5 a 15 años.</p>
+  </div>
+  <div class="branches" id="branches"></div>
+  <button class="refbtn" id="goRefs">Ver referencias bibliográficas</button>
+</div>
+<div class="page" id="refsPage">
+  <button class="back" id="goHome">Volver al mapa</button>
+  <h1 style="font-family:Fredoka;font-weight:600">Referencias bibliográficas</h1>
+  <div class="refs" id="refs"></div>
+  <p class="note">Formato APA 7, en orden alfabético.</p>
+</div>
+</main>
+<dialog id="dlg"><div class="dh"><h3 id="dt"></h3><button class="x" id="dx" aria-label="Cerrar">×</button></div><div class="db" id="dbody"></div></dialog>
+<script>
+const SM="Sohlberg y Mateer, 1987";
+const T=(n,t,e,c)=>({n,t:t+" ("+c+").",e});
+const DATA=[
+{k:"G",title:"Atención",sub:"Seleccionar lo importante y mantener el foco.",
+ info:[
+  {n:"¿Qué es la atención?",t:"La atención es el proceso que permite seleccionar la información importante del entorno y dirigir hacia ella los recursos mentales, dejando de lado lo que no es relevante (Posner y Petersen, 1990)."},
+  {n:"Teorías de la atención",l:["<b>Teoría del filtro (Broadbent, 1958):</b> la información pasa por un filtro que deja procesar un solo mensaje a la vez.","<b>Teoría de recursos (Kahneman, 1973):</b> tenemos energía mental limitada, y podemos hacer varias tareas si no la superan.","<b>Redes atencionales (Posner y Petersen, 1990):</b> la atención funciona con tres redes: alerta, orientación y control ejecutivo."]}],
+ types:[
+  T("Focalizada","Responder a estímulos específicos que llegan por los sentidos","Voltear al escuchar una campana.",SM),
+  T("Sostenida","Mantener la concentración en una actividad durante un tiempo continuo","Armar un rompecabezas completo.",SM),
+  T("Selectiva","Atender lo importante ignorando los distractores","Encontrar una figura entre muchas parecidas.",SM),
+  T("Alternante","Cambiar el foco de atención entre dos tareas o reglas","Pasar de sumar a restar según una señal.",SM),
+  T("Dividida","Responder a varias tareas al mismo tiempo","Escuchar una consigna mientras se dibuja.",SM)],
+ tl:"Tipos de atención (modelo de Sohlberg y Mateer, 1987)"},
+{k:"B",title:"Memoria",sub:"Registrar, guardar y recuperar información.",
+ info:[
+  {n:"¿Qué es la memoria?",t:"La memoria es la capacidad de registrar, guardar y recuperar información, y funciona mediante distintos sistemas con funciones diferentes (Squire, 2004)."},
+  {n:"Teorías de la memoria",l:["<b>Modelo multialmacén (Atkinson y Shiffrin, 1968):</b> la información pasa por tres almacenes: sensorial, corto plazo y largo plazo.","<b>Memoria de trabajo (Baddeley y Hitch, 1974):</b> sistema que mantiene y manipula información temporalmente mientras se realizan tareas.","<b>Niveles de procesamiento (Craik y Lockhart, 1972):</b> mientras más profundo se procesa el significado, mejor se recuerda."]}],
+ types:[
+  T("Sensorial","Retiene por muy poco tiempo lo que captan los sentidos","Ver brevemente una imagen y describirla.","Sperling, 1960"),
+  T("A corto plazo","Guarda poca información durante unos segundos, con capacidad limitada","Repetir una serie de números.","Atkinson y Shiffrin, 1968; Cowan, 2001"),
+  T("De trabajo","Mantiene y manipula información mientras se realiza una tarea","Repetir números en orden inverso.","Baddeley y Hitch, 1974"),
+  T("Episódica","Guarda los eventos vividos, con su momento y lugar","Contar qué hizo el fin de semana.","Tulving, 1972"),
+  T("Semántica","Guarda conocimientos generales y significados","Recordar países y sus capitales.","Tulving, 1972")],
+ tl:"Tipos de memoria"},
+{k:"O",title:"Desarrollo de 5 a 15 años",sub:"Cómo cambian la atención y la memoria con la edad.",
+ info:[
+  {n:"Atención y memoria en la infancia",t:"La memoria de trabajo mantiene una estructura similar desde edades tempranas y su capacidad aumenta con los años (Gathercole et al., 2004). La atención y la memoria de trabajo hacen parte de las funciones ejecutivas, que se desarrollan durante la infancia y la adolescencia (Diamond, 2013). Por eso las actividades se adaptan en tres grupos: 5 a 8, 9 a 11 y 12 a 15 años."}],types:[]}
+];
+const REFS=[
+"Atkinson, R. C., & Shiffrin, R. M. (1968). Human memory: A proposed system and its control processes. En K. W. Spence & J. T. Spence (Eds.), <i>The psychology of learning and motivation</i> (Vol. 2, pp. 89-195). Academic Press.",
+"Baddeley, A. D., & Hitch, G. (1974). Working memory. En G. H. Bower (Ed.), <i>The psychology of learning and motivation</i> (Vol. 8, pp. 47-89). Academic Press.",
+"Broadbent, D. E. (1958). <i>Perception and communication</i>. Pergamon Press.",
+"Cowan, N. (2001). The magical number 4 in short-term memory: A reconsideration of mental storage capacity. <i>Behavioral and Brain Sciences, 24</i>(1), 87-114.",
+"Craik, F. I. M., & Lockhart, R. S. (1972). Levels of processing: A framework for memory research. <i>Journal of Verbal Learning and Verbal Behavior, 11</i>(6), 671-684.",
+"Diamond, A. (2013). Executive functions. <i>Annual Review of Psychology, 64</i>, 135-168.",
+"Gathercole, S. E., Pickering, S. J., Ambridge, B., & Wearing, H. (2004). The structure of working memory from 4 to 15 years of age. <i>Developmental Psychology, 40</i>(2), 177-190.",
+"Kahneman, D. (1973). <i>Attention and effort</i>. Prentice-Hall.",
+"Posner, M. I., & Petersen, S. E. (1990). The attention system of the human brain. <i>Annual Review of Neuroscience, 13</i>, 25-42.",
+"Sohlberg, M. M., & Mateer, C. A. (1987). Effectiveness of an attention-training program. <i>Journal of Clinical and Experimental Neuropsychology, 9</i>(2), 117-130.",
+"Sperling, G. (1960). The information available in brief visual presentations. <i>Psychological Monographs: General and Applied, 74</i>(11), 1-29.",
+"Squire, L. R. (2004). Memory systems of the brain: A brief history and current perspective. <i>Neurobiology of Learning and Memory, 82</i>(3), 171-177.",
+"Tulving, E. (1972). Episodic and semantic memory. En E. Tulving & W. Donaldson (Eds.), <i>Organization of memory</i> (pp. 381-403). Academic Press."];
+const $=s=>document.querySelector(s),dlg=$("#dlg");
+function open(k,title,html){dlg.className=k;$("#dt").textContent=title;$("#dbody").innerHTML=html;dlg.showModal()}
+function chip(k,it,isType){const b=document.createElement("button");b.className="chip";b.textContent=it.n;
+ b.onclick=()=>open(k,it.n,it.l?"<ul>"+it.l.map(x=>"<li>"+x+"</li>").join("")+"</ul>":"<p>"+it.t+"</p>"+(it.e?'<p class="ex"><b>Ejemplo:</b> '+it.e+"</p>":""));return b}
+DATA.forEach(d=>{const s=document.createElement("section");s.className="branch "+d.k;
+ s.innerHTML="<h2>"+d.title+"</h2><p>"+d.sub+"</p>";
+ const g1=document.createElement("div");g1.className="chips";d.info.forEach(i=>g1.appendChild(chip(d.k,i)));s.appendChild(g1);
+ if(d.types.length){const h=document.createElement("div");h.className="group";h.textContent=d.tl;s.appendChild(h);
+  const g2=document.createElement("div");g2.className="chips";d.types.forEach(i=>g2.appendChild(chip(d.k,i,1)));s.appendChild(g2)}
+ $("#branches").appendChild(s)});
+$("#refs").innerHTML=REFS.map(r=>"<p>"+r+"</p>").join("");
+$("#dx").onclick=()=>dlg.close();
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+const show=id=>{document.querySelectorAll(".page").forEach(p=>p.classList.toggle("on",p.id===id));scrollTo(0,0)};
+$("#goRefs").onclick=()=>show("refsPage");$("#goHome").onclick=()=>show("home");
+</script>
+</body>
+</html>
